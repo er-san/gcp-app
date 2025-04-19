@@ -54,3 +54,18 @@ To build, tag, and push your image to be readily available in GCP, you can run o
 ```
 task publish
 ```
+
+### Deploy Terraform
+```
+cd terraform
+tf init
+tf apply -auto-approve
+```
+
+if you are setting up your GCP resources for the first time you might need to run:
+```
+gcloud services enable artifactregistry.googleapis.com --project=hello-world-ct
+
+gcloud services enable run.googleapis.com --project=hello-world-ct
+```
+and set a GCP billing account.
