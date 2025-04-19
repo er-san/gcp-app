@@ -1,0 +1,43 @@
+version: '3'
+
+vars:
+  IMAGE_NAME: hello-world
+  PROJECT_ID: hello-world-ct
+  REGION: us-east1
+  REGISTRY: local
+  IMAGE_REPOSITORY: hello-world
+  FULL_IMAGE: "{{.REGION}}-docker.pkg.dev/{{.PROJECT_ID}}/{{.IMAGE_REPOSITORY}}/{{.IMAGE_NAME}}:latest"
+
+tasks:
+  init:
+    desc: poetry install
+    cmds:
+      - poetry install
+  build:
+    desc: build image for Cloud Run
+    cmds:
+      - docker buildx build --platform linux/amd64 -t {{.IMAGE_NAME}} .
+  run:
+    desc: run docker container
+    deps:
+      - init
+    cmds:
+      - poetry run main
+  runc:
+    desc: run docker container
+    cmds:
+      - docker run --rm -p 8080:8080 {{.REGISTRY}}/{{.IMAGE_NAME}}
+  push:
+    desc: tag and push docker image
+    deps: [tag]
+    cmds:
+      - docker push {{.FULL_IMAGE}}
+  publish:
+    desc: build tag and push docker image
+    cmds:
+      - task build
+      - task push
+  tag:
+    desc: tag docker image
+    cmds:
+      - docker tag {{.IMAGE_NAME}} {{.FULL_IMAGE}}
